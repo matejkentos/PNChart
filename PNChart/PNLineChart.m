@@ -549,8 +549,6 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
             last_y = y;
         }
 
-        [pointsOfPath addObject:[lineStartEndPointsArray copy]];
-        [pathPoints addObject:[linePointsArray copy]];
         // if rangeColors is not nil then it means we need to draw the chart
         // with different colors. colorRangesBetweenP1.. function takes care of
         // partitioning the p1->p2 into segments from which we can create UIBezierPath
