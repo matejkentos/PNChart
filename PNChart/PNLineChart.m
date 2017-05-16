@@ -1050,8 +1050,8 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     for (int lineChartIndex = 0; lineChartIndex < lineCharts.count; lineChartIndex++) {
         PNLineChart *lineChart = lineCharts[lineChartIndex];
         
-        CGFloat chartCavanHeight = 1020 / lineCharts.count;
-        CGFloat xLabelWidth = 1920 / [lineChart.xLabels count];
+        CGFloat chartCavanHeight = 1020.0 / lineCharts.count;
+        CGFloat xLabelWidth = 1920.0 / [lineChart.xLabels count];
         
         NSMutableArray *chartPath = [[NSMutableArray alloc] init];
         NSMutableArray *pointPath = [[NSMutableArray alloc] init];
