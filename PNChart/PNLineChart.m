@@ -355,8 +355,6 @@
 
     [self calculateChartPath:_chartPath
                andPointsPath:_pointPath
-            andPathKeyPoints:_pathPoints
-       andPathStartEndPoints:_endPointsOfPath
   andProgressLinePathsColors:_progressLinePathsColors];
     [self populateChartLines];
     // Draw each line
@@ -403,12 +401,26 @@
     [self setNeedsDisplay];
 }
 
+- (void)calculateChartPath:(NSMutableArray *)chartPath
+               andPointsPath:(NSMutableArray *)pointsPath
+andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
+    
+    [self calculateChartPath:chartPath
+               andPointsPath:pointsPath
+  andProgressLinePathsColors:progressLinePathsColors
+              forCavanHeight:_chartCavanHeight
+              forxLabelWidth:_xLabelWidth
+                     yOffset:0];
+    
+}
+
 
 - (void)calculateChartPath:(NSMutableArray *)chartPath
              andPointsPath:(NSMutableArray *)pointsPath
-          andPathKeyPoints:(NSMutableArray *)pathPoints
-     andPathStartEndPoints:(NSMutableArray *)pointsOfPath
-andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
+andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
+            forCavanHeight:(CGFloat)cavanHeight
+            forxLabelWidth:(CGFloat)xLabelWidth
+                   yOffset:(CGFloat)yOffset {
 
     // Draw each line
 
@@ -445,9 +457,10 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
 
             yValue = chartData.getData(i).y;
 
-            int x = (int) (i * _xLabelWidth + _chartMarginLeft + _xLabelWidth / 2.0);
-            int y = (int)[self yValuePositionInLineChart:yValue];
-
+            int x = (int) (i * xLabelWidth + _chartMarginLeft + xLabelWidth / 2.0);
+            int y = (int)[self yValuePositionInLineChart:yValue forCavanHeight:cavanHeight];
+            y = y + yOffset;
+            
             // Circular point
             if (chartData.inflexionPointStyle == PNLineChartPointStyleCircle) {
 
@@ -682,8 +695,6 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
 
     [self calculateChartPath:_chartPath
                andPointsPath:_pointPath
-            andPathKeyPoints:_pathPoints
-       andPathStartEndPoints:_endPointsOfPath
   andProgressLinePathsColors:_progressLinePathsColors];
 
     for (NSUInteger lineIndex = 0; lineIndex < self.chartData.count; lineIndex++) {
@@ -833,6 +844,17 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
     }
     return _chartCavanHeight - (innerGrade * _chartCavanHeight) - (_yLabelHeight / 2) + _chartMarginTop;
 }
+
+- (CGFloat)yValuePositionInLineChart:(CGFloat)y forCavanHeight:(CGFloat)cavanHeight {
+    CGFloat innerGrade;
+    if (!(_yValueMax - _yValueMin)) {
+        innerGrade = 0.5;
+    } else {
+        innerGrade = ((CGFloat) y - _yValueMin) / (_yValueMax - _yValueMin);
+    }
+    return cavanHeight - (innerGrade * cavanHeight) - (_yLabelHeight / 2) + _chartMarginTop;
+}
+
 
 /**
  * return array of segments which represents the color and path
@@ -1012,6 +1034,76 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors {
     else if (point1.y > point2.y)
         controlPoint.y -= diffY;
     return controlPoint;
+}
+
++ (UIImage *)imageForLineCharts:(NSArray<PNLineChart *>*)lineCharts {
+    
+    //label attributes
+    UIFont *font = [UIFont systemFontOfSize:18.0
+                                     weight:2.0];
+    UIColor *labelColor = [UIColor lightGrayColor];
+    
+    UIGraphicsBeginImageContext(CGSizeMake(1920, 1020));
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGContextSetAllowsAntialiasing(ctx, true);
+    
+    for (int lineChartIndex = 0; lineChartIndex < lineCharts.count; lineChartIndex++) {
+        PNLineChart *lineChart = lineCharts[lineChartIndex];
+        
+        CGFloat chartCavanHeight = 1020 / lineCharts.count;
+        CGFloat xLabelWidth = 1920 / [lineChart.xLabels count];
+        
+        NSMutableArray *chartPath = [[NSMutableArray alloc] init];
+        NSMutableArray *pointPath = [[NSMutableArray alloc] init];
+        NSMutableArray *progressLinePathsColors = [[NSMutableArray alloc] init];
+        
+        [lineChart calculateChartPath:chartPath
+                        andPointsPath:pointPath
+           andProgressLinePathsColors:progressLinePathsColors
+                       forCavanHeight:chartCavanHeight
+                       forxLabelWidth:xLabelWidth
+                              yOffset:(lineChartIndex * chartCavanHeight)];
+        
+
+        for (NSUInteger lineIndex = 0; lineIndex < lineChart.chartData.count; lineIndex++) {
+            NSArray<UIBezierPath *> *progressLines = chartPath[lineIndex];
+            PNLineChartData *chartData = lineChart.chartData[lineIndex];
+            for (UIBezierPath *progressLinePath in progressLines) {
+                [chartData.color setStroke];
+                [progressLinePath stroke];
+            }
+            
+            if (chartData.dataTitle) {
+                CGRect labelrect = CGRectMake(0, lineChartIndex * chartCavanHeight + chartCavanHeight / 2, 1920, 60);
+                NSDictionary *attributes = @{
+                                             NSFontAttributeName:font,
+                                             NSForegroundColorAttributeName:labelColor
+                                             };
+                
+                [chartData.dataTitle drawInRect:labelrect withAttributes:attributes];
+            }
+        }
+    }
+    
+
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    NSData *pngData = UIImageJPEGRepresentation(image, 1.0);
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
+    NSString *filePath = [documentsPath stringByAppendingPathComponent:@"image0.jpg"]; //Add the file nam
+    NSFileManager *fm = [NSFileManager defaultManager];
+    int i = 0;
+    while ([fm fileExistsAtPath:filePath]) {
+        i++;
+        filePath = [documentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"image%d.jpg", i]];
+    }
+    
+    [pngData writeToFile:filePath atomically:YES]; //Write the file
+    
+    return nil;
 }
 
 - (void)drawTextInContext:(CGContextRef)ctx text:(NSString *)text inRect:(CGRect)rect font:(UIFont *)font color:(UIColor *)color {

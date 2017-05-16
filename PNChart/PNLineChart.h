@@ -106,5 +106,6 @@
 
 + (CGPoint)midPointBetweenPoint1:(CGPoint)point1 andPoint2:(CGPoint)point2;
 + (CGPoint)controlPointBetweenPoint1:(CGPoint)point1 andPoint2:(CGPoint)point2;
++ (UIImage *)imageForLineCharts:(NSArray<PNLineChart *>*)lineCharts;
 
 @end
