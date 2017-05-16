@@ -1089,21 +1089,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
-    NSData *pngData = UIImageJPEGRepresentation(image, 1.0);
-    
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
-    NSString *filePath = [documentsPath stringByAppendingPathComponent:@"image0.jpg"]; //Add the file nam
-    NSFileManager *fm = [NSFileManager defaultManager];
-    int i = 0;
-    while ([fm fileExistsAtPath:filePath]) {
-        i++;
-        filePath = [documentsPath stringByAppendingPathComponent:[NSString stringWithFormat:@"image%d.jpg", i]];
-    }
-    
-    [pngData writeToFile:filePath atomically:YES]; //Write the file
-    
-    return nil;
+    return image;
 }
 
 - (void)drawTextInContext:(CGContextRef)ctx text:(NSString *)text inRect:(CGRect)rect font:(UIFont *)font color:(UIColor *)color {
