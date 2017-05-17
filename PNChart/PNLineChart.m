@@ -1036,7 +1036,14 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     return controlPoint;
 }
 
-+ (UIImage *)lineChartsImageForData:(NSArray<NSArray *>*)dataArray {
++ (UIImage *)lineChartsImageForData:(NSArray<NSArray *>*)dataArray
+                     withResolution:(CGSize)size
+                    withChartColors:(NSArray<UIColor *>*)colors
+                         withTitles:(NSArray<NSString *>*)titles {
+
+    if (!dataArray) {
+        return nil;
+    }
     
     //label attributes
     UIFont *font = [UIFont systemFontOfSize:18.0
@@ -1047,18 +1054,26 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSetAllowsAntialiasing(ctx, true);
     
-    CGFloat chartCavanHeight = 1020.0 / dataArray.count;
+    CGFloat chartCavanHeight = size.height / dataArray.count;
     
     for (int lineChartIndex = 0; lineChartIndex < dataArray.count; lineChartIndex++) {
+        
         NSArray *data = [dataArray objectAtIndex:lineChartIndex];
+        UIColor *color = [colors objectAtIndex:lineChartIndex] ?: nil;
+        NSString *title = [titles objectAtIndex:lineChartIndex] ?: nil;
+        
+        // setup line chart
         PNLineChart *lineChart = [[PNLineChart alloc] init];
-        lineChart.showGenYLabels = NO;        NSMutableArray *xLabels = [[NSMutableArray alloc] init];
+        [lineChart setupDefaultValues];
+        lineChart.showGenYLabels = NO;
+        NSMutableArray *xLabels = [[NSMutableArray alloc] init];
         for (int i = 0; i < data.count; i++) {
             [xLabels addObject:@""];
         }
         [lineChart setXLabels:xLabels];
+        
+        // prepare chart data
         PNLineChartData *chartData = [[PNLineChartData alloc] init];
-        chartData.dataTitle = @"I";
         chartData.lineWidth = 1.0f;
         chartData.itemCount = data.count - 1;
         chartData.getData = ^PNLineChartDataItem *(NSUInteger item) {
@@ -1067,8 +1082,10 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         };
         [lineChart setChartData:@[chartData]];
         
-        CGFloat xLabelWidth = 1920.0 / [lineChart.xLabels count];
+        // compute x label width
+        CGFloat xLabelWidth = size.width / [lineChart.xLabels count];
         
+        // calculate path
         NSMutableArray *chartPath = [[NSMutableArray alloc] init];
         NSMutableArray *pointPath = [[NSMutableArray alloc] init];
         NSMutableArray *progressLinePathsColors = [[NSMutableArray alloc] init];
@@ -1082,28 +1099,28 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
                        forxLabelWidth:xLabelWidth
                               yOffset:(lineChartIndex * chartCavanHeight)];
         
-
+        // stroke all paths to current image context
         for (NSUInteger lineIndex = 0; lineIndex < lineChart.chartData.count; lineIndex++) {
             NSArray<UIBezierPath *> *progressLines = chartPath[lineIndex];
-            PNLineChartData *chartData = lineChart.chartData[lineIndex];
             for (UIBezierPath *progressLinePath in progressLines) {
-                [chartData.color setStroke];
+                [color setStroke];
                 [progressLinePath stroke];
             }
             
-            if (chartData.dataTitle) {
+            // set chart line title
+            if (title) {
                 CGRect labelrect = CGRectMake(0, lineChartIndex * chartCavanHeight + chartCavanHeight / 2, 1920, 60);
                 NSDictionary *attributes = @{
                                              NSFontAttributeName:font,
                                              NSForegroundColorAttributeName:labelColor
                                              };
                 
-                [chartData.dataTitle drawInRect:labelrect withAttributes:attributes];
+                [title drawInRect:labelrect withAttributes:attributes];
             }
         }
     }
     
-
+    // get image from current context
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
