@@ -1045,7 +1045,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
                      withResolution:(CGSize)size
                     withChartColors:(NSArray<UIColor *>*)colors
                          withTitles:(NSArray<NSString *>*)titles {
-
+    
     if (!dataArray) {
         return nil;
     }
@@ -1055,7 +1055,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
                                      weight:2.0];
     UIColor *labelColor = [UIColor lightGrayColor];
     
-    UIGraphicsBeginImageContext(CGSizeMake(1920, 1020));
+    UIGraphicsBeginImageContext(size);
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSetAllowsAntialiasing(ctx, true);
     
@@ -1071,8 +1071,6 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         NSArray *data = [dataArray objectAtIndex:lineChartIndex];
         UIColor *color = colors.count > lineChartIndex ? [colors objectAtIndex:lineChartIndex] : nil;
         NSString *title = titles.count > lineChartIndex ? [titles objectAtIndex:lineChartIndex] : nil;
-        
-        // find max and min
         
         // setup line chart
         PNLineChart *lineChart = [[PNLineChart alloc] init];
@@ -1095,6 +1093,23 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         };
         [lineChart setChartData:@[chartData]];
         [lineChart prepareYLabelsWithData:lineChart.chartData];
+        
+        
+        // set chart line title and update margin if needed
+        if (title) {
+            CGRect labelrect = CGRectMake(0, lineChartIndex * chartCavanHeight + chartCavanHeight / 2, 1920, 60);
+            NSDictionary *attributes = @{
+                                         NSFontAttributeName:font,
+                                         NSForegroundColorAttributeName:labelColor
+                                         };
+            CGSize textSize = [title sizeWithAttributes:@{ NSFontAttributeName:font }];
+            [title drawInRect:labelrect withAttributes:attributes];
+            CGFloat marginLeftDefault = MARGIN_LEFT_DEFAULT;
+            if (marginLeft < marginLeftDefault + textSize.width) {
+                marginLeft = marginLeftDefault + textSize.width;
+            }
+            lineChart.chartMarginLeft = marginLeft;
+        }
         
         // compute x label width
         CGFloat xLabelWidth = (size.width - marginLeft - marginRight) / [lineChart.xLabels count];
@@ -1119,16 +1134,6 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
                 [progressLinePath stroke];
             }
             
-            // set chart line title
-            if (title) {
-                CGRect labelrect = CGRectMake(0, lineChartIndex * chartCavanHeight + chartCavanHeight / 2, 1920, 60);
-                NSDictionary *attributes = @{
-                                             NSFontAttributeName:font,
-                                             NSForegroundColorAttributeName:labelColor
-                                             };
-                
-                [title drawInRect:labelrect withAttributes:attributes];
-            }
         }
     }
     
