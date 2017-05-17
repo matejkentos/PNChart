@@ -1072,6 +1072,8 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         UIColor *color = colors.count > lineChartIndex ? [colors objectAtIndex:lineChartIndex] : nil;
         NSString *title = titles.count > lineChartIndex ? [titles objectAtIndex:lineChartIndex] : nil;
         
+        // find max and min
+        
         // setup line chart
         PNLineChart *lineChart = [[PNLineChart alloc] init];
         [lineChart setupDefaultValues];
@@ -1091,6 +1093,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
             return [PNLineChartDataItem dataItemWithY:value];
         };
         [lineChart setChartData:@[chartData]];
+        [lineChart prepareYLabelsWithData:@[chartData]];
         
         // compute x label width
         CGFloat xLabelWidth = (size.width - marginLeft - marginRight) / [lineChart.xLabels count];
