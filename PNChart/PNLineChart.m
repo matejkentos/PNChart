@@ -1036,7 +1036,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     return controlPoint;
 }
 
-+ (UIImage *)imageForLineCharts:(NSArray<PNLineChart *>*)lineCharts {
++ (UIImage *)lineChartsImageForData:(NSArray<NSArray *>*)dataArray {
     
     //label attributes
     UIFont *font = [UIFont systemFontOfSize:18.0
@@ -1047,9 +1047,26 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSetAllowsAntialiasing(ctx, true);
     
-    for (int lineChartIndex = 0; lineChartIndex < lineCharts.count; lineChartIndex++) {
-        PNLineChart *lineChart = lineCharts[lineChartIndex];
-        CGFloat chartCavanHeight = 1020.0 / lineCharts.count;
+    CGFloat chartCavanHeight = 1020.0 / dataArray.count;
+    
+    for (int lineChartIndex = 0; lineChartIndex < dataArray.count; lineChartIndex++) {
+        NSArray *data = [dataArray objectAtIndex:lineChartIndex];
+        PNLineChart *lineChart = [[PNLineChart alloc] init];
+        lineChart.showGenYLabels = NO;        NSMutableArray *xLabels = [[NSMutableArray alloc] init];
+        for (int i = 0; i < data.count; i++) {
+            [xLabels addObject:@""];
+        }
+        [lineChart setXLabels:xLabels];
+        PNLineChartData *chartData = [[PNLineChartData alloc] init];
+        chartData.dataTitle = @"I";
+        chartData.lineWidth = 1.0f;
+        chartData.itemCount = data.count - 1;
+        chartData.getData = ^PNLineChartDataItem *(NSUInteger item) {
+            CGFloat value = [data[item] floatValue];
+            return [PNLineChartDataItem dataItemWithY:value];
+        };
+        [lineChart setChartData:@[chartData]];
+        
         CGFloat xLabelWidth = 1920.0 / [lineChart.xLabels count];
         
         NSMutableArray *chartPath = [[NSMutableArray alloc] init];
