@@ -1059,8 +1059,8 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     for (int lineChartIndex = 0; lineChartIndex < dataArray.count; lineChartIndex++) {
         
         NSArray *data = [dataArray objectAtIndex:lineChartIndex];
-        UIColor *color = [colors objectAtIndex:lineChartIndex] ?: nil;
-        NSString *title = [titles objectAtIndex:lineChartIndex] ?: nil;
+        UIColor *color = colors.count > lineChartIndex ? [colors objectAtIndex:lineChartIndex] : nil;
+        NSString *title = titles.count > lineChartIndex ? [titles objectAtIndex:lineChartIndex] : nil;
         
         // setup line chart
         PNLineChart *lineChart = [[PNLineChart alloc] init];
