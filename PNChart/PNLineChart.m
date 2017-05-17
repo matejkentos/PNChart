@@ -1078,6 +1078,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         PNLineChart *lineChart = [[PNLineChart alloc] init];
         [lineChart setupDefaultValues];
         lineChart.showGenYLabels = NO;
+        lineChart.showLabel = NO;
         NSMutableArray *xLabels = [[NSMutableArray alloc] init];
         for (int i = 0; i < data.count; i++) {
             [xLabels addObject:@""];
@@ -1093,7 +1094,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
             return [PNLineChartDataItem dataItemWithY:value];
         };
         [lineChart setChartData:@[chartData]];
-        [lineChart prepareYLabelsWithData:@[chartData]];
+        [lineChart prepareYLabelsWithData:lineChart.chartData];
         
         // compute x label width
         CGFloat xLabelWidth = (size.width - marginLeft - marginRight) / [lineChart.xLabels count];
@@ -1102,8 +1103,6 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         NSMutableArray *chartPath = [[NSMutableArray alloc] init];
         NSMutableArray *pointPath = [[NSMutableArray alloc] init];
         NSMutableArray *progressLinePathsColors = [[NSMutableArray alloc] init];
-        
-        [lineChart prepareYLabelsWithData:lineChart.chartData];
         
         [lineChart calculateChartPath:chartPath
                         andPointsPath:pointPath
