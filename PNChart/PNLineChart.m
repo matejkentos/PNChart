@@ -12,6 +12,11 @@
 #import "PNLineChartData.h"
 #import "PNLineChartDataItem.h"
 
+#define MARGIN_TOP_DEFAULT      25.0;
+#define MARGIN_BOTTOM_DEFAULT   25.0;
+#define MARGIN_LEFT_DEFAULT     25.0;
+#define MARGIN_RIGHT_DEFAULT    25.0;
+
 @interface PNLineChart ()
 
 @property(nonatomic) NSMutableArray *chartLineArray;  // Array[CAShapeLayer]
@@ -973,10 +978,10 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
 
 //    _chartMargin = 40;
 
-    _chartMarginLeft = 25.0;
-    _chartMarginRight = 25.0;
-    _chartMarginTop = 25.0;
-    _chartMarginBottom = 25.0;
+    _chartMarginLeft = MARGIN_LEFT_DEFAULT;
+    _chartMarginRight = MARGIN_RIGHT_DEFAULT;
+    _chartMarginTop = MARGIN_TOP_DEFAULT;
+    _chartMarginBottom = MARGIN_BOTTOM_DEFAULT;
 
     _yLabelFormat = @"%1.f";
 
@@ -1054,7 +1059,12 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSetAllowsAntialiasing(ctx, true);
     
-    CGFloat chartCavanHeight = size.height / dataArray.count;
+    CGFloat marginTop = MARGIN_TOP_DEFAULT;
+    CGFloat marginBottom = MARGIN_BOTTOM_DEFAULT;
+    CGFloat marginLeft = MARGIN_LEFT_DEFAULT;
+    CGFloat marginRight = MARGIN_RIGHT_DEFAULT;
+    
+    CGFloat chartCavanHeight = (size.height - marginBottom - marginTop) / dataArray.count;
     
     for (int lineChartIndex = 0; lineChartIndex < dataArray.count; lineChartIndex++) {
         
@@ -1083,7 +1093,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         [lineChart setChartData:@[chartData]];
         
         // compute x label width
-        CGFloat xLabelWidth = size.width / [lineChart.xLabels count];
+        CGFloat xLabelWidth = (size.width - marginLeft - marginRight) / [lineChart.xLabels count];
         
         // calculate path
         NSMutableArray *chartPath = [[NSMutableArray alloc] init];
