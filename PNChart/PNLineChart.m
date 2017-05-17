@@ -1097,7 +1097,7 @@ andProgressLinePathsColors:(NSMutableArray *)progressLinePathsColors
         
         // set chart line title and update margin if needed
         if (title) {
-            CGRect labelrect = CGRectMake(0, lineChartIndex * chartCavanHeight + chartCavanHeight / 2, 1920, 60);
+            CGRect labelrect = CGRectMake(8, lineChartIndex * chartCavanHeight + chartCavanHeight / 2, 1920, 60);
             NSDictionary *attributes = @{
                                          NSFontAttributeName:font,
                                          NSForegroundColorAttributeName:labelColor
